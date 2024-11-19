@@ -16,7 +16,7 @@ Veuillez saisir une action
 3. Quitter
 ```
 
-Voici une liste d'événements, avec certains en conflit :
+Voici une liste d'événements, dont certains sont en conflit :
 ```
 - e0, de 11:00 a 12:00
 - [CONFLIT] e1, de 12:00 a 13:00
