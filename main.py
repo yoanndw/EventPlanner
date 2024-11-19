@@ -12,6 +12,9 @@ def main():
             else:
                 for e in planner.list_events():
                     print("-", e)
+
+                print("\nConflits :")
+                print(planner.find_conflicts())
         elif action == "2":
             while True:
                 name = input_name("Nom de l'evenement : ")
