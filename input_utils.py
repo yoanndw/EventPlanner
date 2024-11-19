@@ -1,4 +1,4 @@
-import time
+import datetime
 
 def input_name(prompt):
     while True:
@@ -12,7 +12,7 @@ def input_time(prompt):
     while True:
         s = input(prompt).strip()
         try:
-            t = time.strptime(s, "%H:%M")
+            t = datetime.datetime.strptime(s, "%H:%M").time()
         except ValueError:
             print("[ERREUR] Heure incorrecte.\n")
         else:
