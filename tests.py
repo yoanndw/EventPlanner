@@ -47,7 +47,53 @@ class EventTest(unittest.TestCase):
         e = Event("   TeSt    ", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00))
         self.assertEqual(str(e), "TeSt, de 15:10 a 16:00")
 
-        
+class EventPlannerTest(unittest.TestCase):
+    def setUp(self):
+        self.ep = EventPlanner()
+    
+    def test_add_unique_event(self):
+        self.ep.add_event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10))
+        self.assertEqual(
+            self.ep.list_events(), 
+            [
+                Event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10)), 
+            ]
+        )
+
+    def test_add_event_at_the_end(self):
+        self.ep.add_event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10))
+        self.ep.add_event("e2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
+        self.assertEqual(
+            self.ep.list_events(), 
+            [
+                Event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10)), 
+                Event("e2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
+            ]
+        )
+
+    def test_add_first_event_at_the_end(self):
+        self.ep.add_event("added first", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
+        self.ep.add_event("added after", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10))
+        self.assertEqual(
+            self.ep.list_events(), 
+            [
+                Event("added after", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10)), 
+                Event("added first", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
+            ]
+        )
+    
+    def test_add_second_event_at_the_end(self):
+        self.ep.add_event("1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10))
+        self.ep.add_event("2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
+        self.ep.add_event("3", datetime.time(hour=16, minute=0), datetime.time(hour=16, minute=10))
+        self.assertEqual(
+            self.ep.list_events(), 
+            [
+                Event("1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10)),
+                Event("3", datetime.time(hour=16, minute=0), datetime.time(hour=16, minute=10)),
+                Event("2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00)),
+            ]
+        )
 
 if __name__ == "__main__":
     unittest.main()
