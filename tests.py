@@ -1,7 +1,7 @@
 import datetime
 import unittest
 
-from events import Event, EventPlanner
+from events import Event, EventCreationException, EventPlanner
 
 class EventTest(unittest.TestCase):
     def test_constructor_strips_name(self):
@@ -46,6 +46,13 @@ class EventTest(unittest.TestCase):
 
         e = Event("   TeSt    ", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00))
         self.assertEqual(str(e), "TeSt, de 15:10 a 16:00")
+
+    def test_incoherent_times(self):
+        with self.assertRaises(EventCreationException) as ex:
+            e = Event("e", datetime.time(hour=17, minute=10), datetime.time(hour=16, minute=00))
+        
+        self.assertEqual(str(ex.exception), "L'evenement doit commencer au moins une minute apres son debut.")
+
 
 class EventPlannerTest(unittest.TestCase):
     def setUp(self):
@@ -94,6 +101,19 @@ class EventPlannerTest(unittest.TestCase):
                 Event("2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00)),
             ]
         )
+
+    def test_add_event_incoherent_times(self):
+        with self.assertRaises(EventCreationException) as ex:
+            self.ep.add_event("e", datetime.time(hour=17, minute=10), datetime.time(hour=16, minute=00))
+        
+        self.assertEqual(str(ex.exception), "L'evenement doit commencer au moins une minute apres son debut.")
+
+    def test_add_event_existing_name(self):
+        self.ep.add_event("e", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00))
+        with self.assertRaises(EventCreationException) as ex:
+            self.ep.add_event("e  ", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00))
+
+        self.assertEqual(str(ex.exception), "Un evenement avec le nom \"e\" existe deja.")
 
 if __name__ == "__main__":
     unittest.main()

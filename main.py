@@ -1,4 +1,4 @@
-from events import EventPlanner
+from events import EventPlanner, EventCreationException
 from input_utils import input_name, input_time
 
 def main():
@@ -18,18 +18,21 @@ def main():
         elif action == "2":
             while True:
                 name = input_name("Nom de l'evenement : ")
-                if planner.event_exists(name):
-                    print(f"[ERREUR] L'evenement avec le nom \"{name}\" existe deja.\n")
+                start = input_time("Heure de debut : ")
+                end = input_time("Heure de fin : ")
+
+                try:
+                    conflicts = planner.add_event(name, start, end)
+                except EventCreationException as e:
+                    print(f"[ERREUR] {e}\n")
+                    continue
                 else:
+                    if len(conflicts) > 0:
+                        print(f"Evenements en conflit avec ce nouvel evenement : \n{conflicts}")
+                    print("Un evenement ajoute avec succes.\n")
+                finally:
                     break
-
-            start = input_time("Heure de debut : ")
-            end = input_time("Heure de fin : ", start)
-
-            conflicts = planner.add_event(name, start, end)
-            if len(conflicts) > 0:
-                print(f"Evenements en conflit avec ce nouvel evenement : \n{conflicts}")
-            print("Un evenement ajoute avec succes.\n")
+                
         elif action == "3":
             break
 

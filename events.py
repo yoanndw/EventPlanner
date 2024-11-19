@@ -4,6 +4,8 @@ import time
 
 class Event:
     def __init__(self, name, start, end):
+        if start >= end:
+            raise EventCreationException("L'evenement doit commencer au moins une minute apres son debut.")
         self.name = name.strip()
         self.start = start
         self.end = end
@@ -30,6 +32,9 @@ class EventPlanner:
 
     def add_event(self, name, start, end):
         event = Event(name, start, end)
+        if self._event_exists(name.strip()):
+            raise EventCreationException(f"Un evenement avec le nom \"{name.strip()}\" existe deja.")
+
         conflicts_with_event = []
         i = 0
         while i < len(self.events) and event.start >= self.events[i].start:
@@ -68,6 +73,10 @@ class EventPlanner:
             j += 1
         
         return conflicts_with_e
-    
-    def event_exists(self, name):
+
+    def _event_exists(self, name):
         return any(e.same_name(name) for e in self.events)
+
+class EventCreationException(Exception):
+    def __init__(self, message):
+        super().__init__(message)
