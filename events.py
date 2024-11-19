@@ -23,19 +23,26 @@ class Event:
     def __repr__(self):
         return f"<{self.name}, {time.strftime("%H:%M", self.start)} - {time.strftime("%H:%M", self.end)}>"
 
+
 class EventPlanner:
     def __init__(self):
         self.events = []
 
     def add_event(self, name, start, end):
         event = Event(name, start, end)
+        conflicts_with_event = []
         i = 0
-        while i < len(self.events):
-            if event.start < self.events[i].start:
-                break
+        while i < len(self.events) and event.start >= self.events[i].start:
+            if self.events[i].end > event.start:
+                conflicts_with_event.append(self.events[i])
             i += 1
 
+        j = i
+        while j < len(self.events) and self.events[j].start < event.end:
+            conflicts_with_event.append(self.events[j])
+            j += 1
         self.events.insert(i, event)
+        return conflicts_with_event
 
     def list_events(self):
         return self.events
@@ -46,17 +53,23 @@ class EventPlanner:
         i = 0
         while i < len(events) - 1:
             e = events[i]
-            conflicts_with_e = [e]
-            j = i + 1
-            while j < len(events) and events[j].start < e.end:
-                conflicts_with_e.append(events[j])
-                j += 1
+            conflicts_with_e = self._find_conflicts_frontward(i, e)
 
             if len(conflicts_with_e) > 1:
                 conflicts.append(conflicts_with_e)
             i += 1
 
         return conflicts
+    
+    def _find_conflicts_frontward(self, start_index, event):
+        events = self.list_events()
+        conflicts_with_e = [event]
+        j = start_index + 1
+        while j < len(events) and events[j].start < event.end:
+            conflicts_with_e.append(events[j])
+            j += 1
+        
+        return conflicts_with_e
     
     def event_exists(self, name):
         return any(e.same_name(name) for e in self.events)

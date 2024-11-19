@@ -26,7 +26,9 @@ def main():
             start = input_time("Heure de debut : ")
             end = input_time("Heure de fin : ", start)
 
-            planner.add_event(name, start, end)
+            conflicts = planner.add_event(name, start, end)
+            if len(conflicts) > 0:
+                print(f"Evenements en conflit avec ce nouvel evenement : \n{conflicts}")
             print("Un evenement ajoute avec succes.\n")
         elif action == "3":
             break
