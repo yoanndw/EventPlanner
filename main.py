@@ -5,16 +5,14 @@ def main():
     planner = EventPlanner()
     print("Planificateur d'evenements")
     while True:
-        action = input("Veuillez saisir une action\n1. Lister evenements\n2. Ajouter evenement\n3. Quitter\n").strip()
+        action = input("\nVeuillez saisir une action\n1. Lister evenements\n2. Ajouter evenement\n3. Quitter\n").strip()
         if action == "1":
+            print()
             if len(planner.list_events()) == 0:
                 print("Aucun evenement planifie.")
             else:
                 for e in planner.list_events():
                     print("-", e)
-
-                print("\nConflits :")
-                print(planner.find_conflicts())
         elif action == "2":
             while True:
                 name = input_name("Nom de l'evenement : ")
@@ -28,8 +26,10 @@ def main():
                     continue
                 else:
                     if len(conflicts) > 0:
-                        print(f"Evenements en conflit avec ce nouvel evenement : \n{conflicts}")
-                    print("Un evenement ajoute avec succes.\n")
+                        print(f"Evenements en conflit avec ce nouvel evenement :")
+                        for e in conflicts:
+                            print(f"- {e}")
+                    print("\n\nUn evenement ajoute avec succes.")
                 finally:
                     break
                 
