@@ -1,4 +1,5 @@
 from events import EventPlanner
+from input_utils import input_name, input_time
 
 def main():
     planner = EventPlanner()
@@ -12,12 +13,18 @@ def main():
                 for e in planner.list_events():
                     print("-", e)
         elif action == "2":
-            name = input("Nom de l'evenement : ")
-            start = input("Heure de debut : ")
-            end = input("Heure de fin : ")
+            while True:
+                name = input_name("Nom de l'evenement : ")
+                if planner.event_exists(name):
+                    print(f"[ERREUR] L'evenement avec le nom \"{name}\" existe deja.\n")
+                else:
+                    break
+
+            start = input_time("Heure de debut : ")
+            end = input_time("Heure de fin : ", start)
 
             planner.add_event(name, start, end)
-            print("Un evenement ajoute avec succes.")
+            print("Un evenement ajoute avec succes.\n")
         elif action == "3":
             break
 
