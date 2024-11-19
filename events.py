@@ -37,10 +37,7 @@ class EventPlanner:
                 conflicts_with_event.append(self.events[i])
             i += 1
 
-        j = i
-        while j < len(self.events) and self.events[j].start < event.end:
-            conflicts_with_event.append(self.events[j])
-            j += 1
+        conflicts_with_event.extend(self._find_conflicts_forward(i, event))
         self.events.insert(i, event)
         return conflicts_with_event
 
@@ -53,18 +50,19 @@ class EventPlanner:
         i = 0
         while i < len(events) - 1:
             e = events[i]
-            conflicts_with_e = self._find_conflicts_frontward(i, e)
+            conflicts_with_e = self._find_conflicts_forward(i + 1, e)
 
-            if len(conflicts_with_e) > 1:
+            if len(conflicts_with_e) > 0:
+                conflicts_with_e.insert(0, e)
                 conflicts.append(conflicts_with_e)
             i += 1
 
         return conflicts
     
-    def _find_conflicts_frontward(self, start_index, event):
+    def _find_conflicts_forward(self, start_index, event):
         events = self.list_events()
-        conflicts_with_e = [event]
-        j = start_index + 1
+        conflicts_with_e = []
+        j = start_index
         while j < len(events) and events[j].start < event.end:
             conflicts_with_e.append(events[j])
             j += 1
