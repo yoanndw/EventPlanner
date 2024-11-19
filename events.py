@@ -4,24 +4,24 @@ import time
 
 class Event:
     def __init__(self, name, start, end):
-        self.name = name
+        self.name = name.strip()
         self.start = start
         self.end = end
 
     def __str__(self):
-        return f"{self.name}, de {time.strftime("%H:%M", self.start)} a {time.strftime("%H:%M", self.end)}"
+        return f"{self.name}, de {self.start.strftime("%H:%M")} a {self.end.strftime("%H:%M")}"
 
     def same_name(self, name):
-        return self.name.lower() == name.lower()
+        return self.name.lower() == name.lower().strip()
     
     def __eq__(self, value):
-        if value is not Event:
+        if not isinstance(value, Event):
             return False
         
         return self.same_name(value.name) and self.start == value.start and self.end == value.end
 
     def __repr__(self):
-        return f"<{self.name}, {time.strftime("%H:%M", self.start)} - {time.strftime("%H:%M", self.end)}>"
+        return f"<{self.name}, {self.start.strftime("%H:%M")} - {self.end.strftime("%H:%M")}>"
 
 
 class EventPlanner:
