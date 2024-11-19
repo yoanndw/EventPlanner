@@ -47,6 +47,9 @@ class EventTest(unittest.TestCase):
         e = Event("   TeSt    ", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00))
         self.assertEqual(str(e), "TeSt, de 15:10 a 16:00")
 
+        e = Event("E", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00), True)
+        self.assertEqual(str(e), "[CONFLIT] E, de 15:10 a 16:00")
+
     def test_incoherent_times(self):
         with self.assertRaises(EventCreationException) as ex:
             e = Event("e", datetime.time(hour=17, minute=10), datetime.time(hour=16, minute=00))
@@ -92,12 +95,12 @@ class EventPlannerTest(unittest.TestCase):
     def test_add_second_event_at_the_end(self):
         self.ep.add_event("1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10))
         self.ep.add_event("2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
-        self.ep.add_event("3", datetime.time(hour=16, minute=0), datetime.time(hour=16, minute=10))
+        self.ep.add_event("3", datetime.time(hour=16, minute=10), datetime.time(hour=16, minute=20))
         self.assertEqual(
             self.ep.list_events(), 
             [
                 Event("1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=10)),
-                Event("3", datetime.time(hour=16, minute=0), datetime.time(hour=16, minute=10)),
+                Event("3", datetime.time(hour=16, minute=10), datetime.time(hour=16, minute=20)),
                 Event("2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00)),
             ]
         )
@@ -114,6 +117,54 @@ class EventPlannerTest(unittest.TestCase):
             self.ep.add_event("e  ", datetime.time(hour=15, minute=10), datetime.time(hour=16, minute=00))
 
         self.assertEqual(str(ex.exception), "Un evenement avec le nom \"e\" existe deja.")
+
+    def test_add_event_conflict_with_other_events(self):
+        self.ep.add_event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=00))
+        self.ep.add_event("e2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00))
+        conflicts = self.ep.add_event("conflict", datetime.time(hour=15, minute=30), datetime.time(hour=17, minute=00))
+
+        self.assertEqual(
+            conflicts,
+            [
+                Event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=00), True),
+                Event("e2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00), True),
+            ]
+        )
+
+        self.assertEqual(
+            self.ep.list_events(),
+            [
+                Event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=00), True),
+                Event("conflict", datetime.time(hour=15, minute=30), datetime.time(hour=17, minute=00), True),
+                Event("e2", datetime.time(hour=16, minute=30), datetime.time(hour=17, minute=00), True),
+            ]
+        )
+
+    def test_consecutive_events_are_not_in_conflict(self):
+        self.ep.add_event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=00))
+        self.ep.add_event("e2", datetime.time(hour=16, minute=0), datetime.time(hour=17, minute=00))
+        self.assertEqual([], self.ep.find_conflicts())
+
+    def test_find_conflicts(self):
+        self.ep.add_event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=00))
+        self.ep.add_event("e2", datetime.time(hour=15, minute=10), datetime.time(hour=17, minute=00))
+
+        self.ep.add_event("e3", datetime.time(hour=17, minute=5), datetime.time(hour=17, minute=15))
+        self.ep.add_event("e4", datetime.time(hour=17, minute=10), datetime.time(hour=18, minute=00))
+        self.assertEqual(
+            self.ep.find_conflicts(),
+            [
+                [
+                    Event("e1", datetime.time(hour=15, minute=0), datetime.time(hour=16, minute=00), True),
+                    Event("e2", datetime.time(hour=15, minute=10), datetime.time(hour=17, minute=00), True)
+                ],
+                [
+                    Event("e3", datetime.time(hour=17, minute=5), datetime.time(hour=17, minute=15), True),
+                    Event("e4", datetime.time(hour=17, minute=10), datetime.time(hour=18, minute=00), True),
+                ]
+            ]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
